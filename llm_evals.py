@@ -41,18 +41,14 @@ def generate_answers(questions: list[str]):
         qa_pairs.append((question, answer))
     return qa_pairs
 
-def evaluate_answers(qa_pairs: list[tuple[str, str]]):
+def evaluate_answers(qa_pairs: list[tuple[str, str]], eval_prompt_template: str):
     """
     Evaluates the correctness of answers in a list of question-answer pairs.
     Returns a list of scores.
     """
     scores = []
     for question, answer in qa_pairs:
-        prompt = (
-            f"Please evaluate the correctness of the following answer for the given question. "
-            f"Provide a score from 1 to 5, where 1 is completely incorrect and 5 is completely correct and well-explained."
-            f"\n\nQuestion: {question}\n\nAnswer: {answer}\n\nScore (1-5):"
-        )
+        prompt = eval_prompt_template.format(question=question, answer=answer)
         response_text = prompt_llm(prompt)
         match = re.search(r'\b[1-5]\b', response_text)
         if match:
@@ -82,7 +78,12 @@ def main():
             print(f"Q: {q}\nA: {a}\n")
 
         print("\nEvaluating answers...")
-        scores = evaluate_answers(qa_pairs)
+        eval_prompt_template = (
+            f"Please evaluate the correctness of the following answer for the given question. "
+            f"Provide a score from 1 to 5, where 1 is completely incorrect and 5 is completely correct and well-explained."
+            f"\n\nQuestion: {{question}}\n\nAnswer: {{answer}}\n\nScore (1-5):"
+        )
+        scores = evaluate_answers(qa_pairs, eval_prompt_template)
 
         print("\n--- Evaluation Scores ---")
         total_score = 0
