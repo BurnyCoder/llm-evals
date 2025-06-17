@@ -47,14 +47,14 @@ def evaluate():
     if not qa_pairs:
         return render_template('index.html', results=[], average_score=0)
 
-    scores = llm_evals.evaluate_answers(qa_pairs, eval_prompt)
+    evaluations = llm_evals.evaluate_answers(qa_pairs, eval_prompt)
 
     results = []
     total_score = 0
     valid_scores = 0
     for i, (q, a) in enumerate(qa_pairs):
-        score = scores[i]
-        results.append({'question': q, 'answer': a, 'score': score})
+        score, notes = evaluations[i]
+        results.append({'question': q, 'answer': a, 'score': score, 'notes': notes})
         if score is not None:
             total_score += score
             valid_scores += 1

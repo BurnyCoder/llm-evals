@@ -44,19 +44,24 @@ def generate_answers(questions: list[str]):
 def evaluate_answers(qa_pairs: list[tuple[str, str]], eval_prompt_template: str):
     """
     Evaluates the correctness of answers in a list of question-answer pairs.
-    Returns a list of scores.
+    Returns a list of (score, notes) tuples.
     """
-    scores = []
+    evaluations = []
     for question, answer in qa_pairs:
         prompt = eval_prompt_template.format(question=question, answer=answer)
         response_text = prompt_llm(prompt)
-        match = re.search(r'\b[1-5]\b', response_text)
-        if match:
-            scores.append(int(match.group(0)))
+        
+        score_match = re.search(r'\b[1-5]\b', response_text)
+        score = int(score_match.group(0)) if score_match else None
+        
+        notes = response_text.strip()
+
+        if score is not None:
+            evaluations.append((score, notes))
         else:
             print(f"Warning: Could not extract a score for question: '{question}'")
-            scores.append(None)
-    return scores
+            evaluations.append((None, notes))
+    return evaluations
 
 def main():
     topic = "AI trivia"
@@ -86,14 +91,14 @@ def main():
             f"Provide a score from 1 to 5, where 1 is completely incorrect and 5 is completely correct and well-explained."
             f"\n\nQuestion: {{question}}\n\nAnswer: {{answer}}\n\nScore (1-5):"
         )
-        scores = evaluate_answers(qa_pairs, eval_prompt_template)
+        evals = evaluate_answers(qa_pairs, eval_prompt_template)
 
         print("\n--- Evaluation Scores ---")
         total_score = 0
         valid_scores = 0
         for i, (q, a) in enumerate(qa_pairs):
-            score = scores[i]
-            print(f"Q: {q}\nScore: {score}/5\n" if score is not None else f"Q: {q}\nScore: Not available\n")
+            score, notes = evals[i]
+            print(f"Q: {q}\nScore: {score}/5\nNotes: {notes}\n" if score is not None else f"Q: {q}\nScore: Not available\nNotes: {notes}\n")
             if score is not None:
                 total_score += score
                 valid_scores += 1

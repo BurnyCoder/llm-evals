@@ -44,7 +44,7 @@
                                 <td contenteditable="true">{{ result.question }}</td>
                                 <td contenteditable="true">{{ result.answer }}</td>
                                 <td contenteditable="true" class="score">{{ result.score if result.score is not none else 'N/A' }}</td>
-                                <td contenteditable="true"></td>
+                                <td contenteditable="true">{{ result.notes }}</td>
                             </tr>
                             {% endfor %}
                         {% else %}
