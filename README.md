@@ -2,6 +2,8 @@
 
 This repository contains a web-based application for evaluating Large Language Models.
 
+![image](https://github.com/user-attachments/assets/a5499770-3e9e-448e-ba6c-25403b23d283)
+
 ## Features
 
 - Generate test questions on a given topic.
