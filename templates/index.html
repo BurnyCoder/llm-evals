@@ -3,26 +3,67 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>LLM Eval</title>
+    <title>LLM Evaluation Sheet</title>
     <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
     <div class="container">
-        <h1>LLM Evals</h1>
-        <form action="/evaluate" method="post">
+        <h1>LLM Evaluation Sheet</h1>
+
+        {% if average_score is defined %}
+        <h2>Average Score: {{ "%.2f"|format(average_score) }}/5</h2>
+        {% endif %}
+
+        <div class="generation-controls">
             <div class="form-group">
                 <label for="topic">Topic</label>
                 <input type="text" id="topic" name="topic" value="AI trivia">
             </div>
-
             <div class="form-group">
-                <label for="num_questions">Number of Questions to Generate</label>
+                <label for="num_questions">Number of Questions</label>
                 <input type="number" id="num_questions" name="num_questions" value="5">
             </div>
+            <button type="button" id="generate-questions">Generate Questions</button>
+        </div>
 
-            <div class="form-group">
-                <label for="questions">Or provide your own questions (one per line)</label>
-                <textarea id="questions" name="questions" rows="8"></textarea>
+        <form id="eval-form" action="/evaluate" method="post">
+            <div class="table-container">
+                <table id="eval-table">
+                    <thead>
+                        <tr>
+                            <th>Question</th>
+                            <th>Answer</th>
+                            <th>Evaluation</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% if results %}
+                            {% for result in results %}
+                            <tr>
+                                <td contenteditable="true">{{ result.question }}</td>
+                                <td contenteditable="true">{{ result.answer }}</td>
+                                <td contenteditable="true" class="score">{{ result.score if result.score is not none else 'N/A' }}</td>
+                                <td contenteditable="true"></td>
+                            </tr>
+                            {% endfor %}
+                        {% else %}
+                            {% for i in range(10) %}
+                            <tr>
+                                <td contenteditable="true"></td>
+                                <td contenteditable="true"></td>
+                                <td contenteditable="true"></td>
+                                <td contenteditable="true"></td>
+                            </tr>
+                            {% endfor %}
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="table-controls">
+                <button type="button" id="add-row">Add Row</button>
+                <button type="button" id="generate-answers">Generate Answers</button>
             </div>
 
             <div class="form-group">
@@ -33,11 +74,97 @@ Question: {question}
 
 Answer: {answer}
 
-Score (1-5):</textarea>
+Evaluation (1-5):</textarea>
             </div>
 
+            <input type="hidden" name="eval_data" id="eval_data">
             <button type="submit">Run Evaluation</button>
         </form>
     </div>
+
+    <script>
+        document.getElementById('add-row').addEventListener('click', () => {
+            const tableBody = document.querySelector('#eval-table tbody');
+            const newRow = document.createElement('tr');
+            newRow.innerHTML = `
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+            `;
+            tableBody.appendChild(newRow);
+        });
+
+        document.getElementById('generate-questions').addEventListener('click', () => {
+            const topic = document.getElementById('topic').value;
+            const numQuestions = document.getElementById('num_questions').value;
+            
+            fetch('/generate-questions', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ topic, num_questions: numQuestions })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const tableBody = document.querySelector('#eval-table tbody');
+                tableBody.innerHTML = ''; // Clear existing rows
+                data.questions.forEach(question => {
+                    const newRow = document.createElement('tr');
+                    newRow.innerHTML = `
+                        <td contenteditable="true">${question}</td>
+                        <td contenteditable="true"></td>
+                        <td contenteditable="true"></td>
+                        <td contenteditable="true"></td>
+                    `;
+                    tableBody.appendChild(newRow);
+                });
+            });
+        });
+
+        document.getElementById('generate-answers').addEventListener('click', () => {
+            const tableRows = document.querySelectorAll('#eval-table tbody tr');
+            const questions = [];
+            tableRows.forEach(row => {
+                const questionCell = row.querySelector('td:first-child');
+                if (questionCell && questionCell.innerText.trim()) {
+                    questions.push(questionCell.innerText.trim());
+                }
+            });
+
+            fetch('/generate-answers', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ questions })
+            })
+            .then(response => response.json())
+            .then(data => {
+                const answers = data.answers;
+                let answerIndex = 0;
+                tableRows.forEach(row => {
+                    const questionCell = row.querySelector('td:first-child');
+                    const answerCell = row.querySelector('td:nth-child(2)');
+                    if (questionCell && questionCell.innerText.trim() && answerCell) {
+                        if(answerIndex < answers.length) {
+                           answerCell.innerText = answers[answerIndex++];
+                        }
+                    }
+                });
+            });
+        });
+
+        document.getElementById('eval-form').addEventListener('submit', (event) => {
+            const tableRows = document.querySelectorAll('#eval-table tbody tr');
+            const evalData = [];
+            tableRows.forEach(row => {
+                const cells = row.querySelectorAll('td');
+                const question = cells[0].innerText.trim();
+                const answer = cells[1].innerText.trim();
+                if (question || answer) {
+                    evalData.push({ question, answer });
+                }
+            });
+            document.getElementById('eval_data').value = JSON.stringify(evalData);
+        });
+    </script>
 </body>
 </html> 

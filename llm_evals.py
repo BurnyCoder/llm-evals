@@ -32,14 +32,14 @@ def generate_test_questions(topic: str, num_questions: int = 5):
 
 def generate_answers(questions: list[str]):
     """
-    Generates answers for a list of questions and returns question-answer pairs.
+    Generates answers for a list of questions and returns a list of answers.
     """
-    qa_pairs = []
+    answers = []
     for question in questions:
         prompt = f"What is the answer to the following question: {question}"
         answer = prompt_llm(prompt)
-        qa_pairs.append((question, answer))
-    return qa_pairs
+        answers.append(answer)
+    return answers
 
 def evaluate_answers(qa_pairs: list[tuple[str, str]], eval_prompt_template: str):
     """
@@ -71,7 +71,10 @@ def main():
 
     if questions:
         print("\nGenerating answers...")
-        qa_pairs = generate_answers(questions)
+        qa_pairs = []
+        answers = generate_answers(questions)
+        for i, question in enumerate(questions):
+            qa_pairs.append((question, answers[i]))
 
         print("\n--- Generated Q&A Pairs ---")
         for q, a in qa_pairs:

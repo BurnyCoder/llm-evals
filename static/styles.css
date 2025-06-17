@@ -59,21 +59,45 @@ button {
     gap: 0.5em;
 }
 
+.table-container {
+    overflow-x: auto;
+}
+
+.table-controls {
+    margin-top: 1em;
+}
+
 table {
     width: 100%;
     border-collapse: collapse;
     margin-top: 1em;
+    border: 2px solid #ccc;
 }
 
 th, td {
     border: 1px solid #ccc;
     padding: 0.8em;
     text-align: left;
+    min-width: 150px;
 }
 
 th {
     background-color: #f2f2f2;
     font-weight: bold;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+td[contenteditable="true"] {
+    background-color: #fff;
+    cursor: cell;
+}
+
+td[contenteditable="true"]:focus {
+    background-color: #e8f0fe;
+    outline: 2px solid #007bff;
+    outline-offset: -1px;
 }
 
 .score {
@@ -85,4 +109,16 @@ a {
     text-decoration: none;
     color: #007bff;
     font-weight: bold;
+}
+
+.generation-controls {
+    display: flex;
+    gap: 1em;
+    align-items: flex-end;
+    margin-bottom: 1.5em;
+    flex-wrap: wrap;
+}
+
+.generation-controls .form-group {
+    flex-grow: 1;
 } 
