@@ -4,37 +4,34 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Evaluation Results</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            margin: 2em;
-        }
-        .result {
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            padding: 1em;
-            margin-bottom: 1em;
-        }
-        .question {
-            font-weight: bold;
-        }
-        .score {
-            font-style: italic;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
+<div class="container">
     <h1>Evaluation Results</h1>
     <h2>Average Score: {{ "%.2f"|format(average_score) }}/5</h2>
 
-    {% for result in results %}
-    <div class="result">
-        <p class="question">{{ result.question }}</p>
-        <p>{{ result.answer }}</p>
-        <p class="score">Score: {{ result.score if result.score is not none else 'Not available' }}/5</p>
-    </div>
-    {% endfor %}
+    <table>
+        <thead>
+            <tr>
+                <th>Question</th>
+                <th>Answer</th>
+                <th>Score</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for result in results %}
+            <tr>
+                <td>{{ result.question }}</td>
+                <td>{{ result.answer }}</td>
+                <td class="score">{{ result.score if result.score is not none else 'N/A' }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
 
+    <br>
     <a href="/">Run another evaluation</a>
+</div>
 </body>
 </html> 

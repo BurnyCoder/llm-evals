@@ -4,58 +4,40 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>LLM Eval</title>
-    <style>
-        body {
-            font-family: sans-serif;
-            margin: 2em;
-        }
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 1em;
-            max-width: 600px;
-        }
-        label {
-            font-weight: bold;
-        }
-        input, textarea {
-            padding: 0.5em;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-        button {
-            padding: 0.7em;
-            border: none;
-            border-radius: 4px;
-            background-color: #007bff;
-            color: white;
-            cursor: pointer;
-            font-size: 1em;
-        }
-    </style>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
 </head>
 <body>
-    <h1>LLM Evals</h1>
-    <form action="/evaluate" method="post">
-        <label for="topic">Topic</label>
-        <input type="text" id="topic" name="topic" value="AI trivia">
+    <div class="container">
+        <h1>LLM Evals</h1>
+        <form action="/evaluate" method="post">
+            <div class="form-group">
+                <label for="topic">Topic</label>
+                <input type="text" id="topic" name="topic" value="AI trivia">
+            </div>
 
-        <label for="num_questions">Number of Questions to Generate</label>
-        <input type="number" id="num_questions" name="num_questions" value="5">
+            <div class="form-group">
+                <label for="num_questions">Number of Questions to Generate</label>
+                <input type="number" id="num_questions" name="num_questions" value="5">
+            </div>
 
-        <label for="questions">Or provide your own questions (one per line)</label>
-        <textarea id="questions" name="questions" rows="5"></textarea>
+            <div class="form-group">
+                <label for="questions">Or provide your own questions (one per line)</label>
+                <textarea id="questions" name="questions" rows="8"></textarea>
+            </div>
 
-        <label for="eval_prompt">Evaluation Prompt</label>
-        <textarea id="eval_prompt" name="eval_prompt" rows="5">Please evaluate the correctness of the following answer for the given question. Provide a score from 1 to 5, where 1 is completely incorrect and 5 is completely correct and well-explained.
+            <div class="form-group">
+                <label for="eval_prompt">Evaluation Prompt</label>
+                <textarea id="eval_prompt" name="eval_prompt" rows="8">Please evaluate the correctness of the following answer for the given question. Provide a score from 1 to 5, where 1 is completely incorrect and 5 is completely correct and well-explained.
 
 Question: {question}
 
 Answer: {answer}
 
 Score (1-5):</textarea>
+            </div>
 
-        <button type="submit">Run Evaluation</button>
-    </form>
+            <button type="submit">Run Evaluation</button>
+        </form>
+    </div>
 </body>
 </html> 
