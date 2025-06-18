@@ -1,43 +1,52 @@
-# llm-evals
+# LLM Evaluation Sheet
 
-This repository contains a web-based application for evaluating Large Language Models.
-
-![image](https://github.com/user-attachments/assets/862efda7-a320-4314-8278-2d3adbd57891)
+This is a web application built with [Reflex](https://reflex.dev/) that allows you to evaluate and compare the performance of different Large Language Models (LLMs), specifically OpenAI and Google models.
 
 ## Features
 
-- Generate test questions on a given topic.
-- Provide your own custom questions.
-- Customize the evaluation prompt.
-- View evaluation results and average scores.
+- **Generate Questions:** Automatically generate a set of questions on a given topic.
+- **Generate Answers:** Automatically generate answers for the questions using a selected LLM.
+- **Side-by-Side Evaluation:** Score the answers from both OpenAI and Google models and add notes.
+- **Dynamic Table:** Add or remove rows from the evaluation sheet as needed.
+- **Custom Evaluation Prompt:** Modify the prompt used to evaluate the answers.
 
-## Setup
+## Setup and Installation
 
 1.  **Clone the repository:**
     ```bash
-    git clone https://github.com/BurnyCoder/llm-evals.git
+    git clone <your-repo-url>
     cd llm-evals
     ```
 
-2.  **Create a virtual environment and install dependencies:**
+2.  **Create and activate a virtual environment (recommended):**
     ```bash
-    python -m venv venv
-    venv\Scripts\activate  # On Windows
-    # source venv/bin/activate  # On macOS/Linux
+    python -m venv .venv
+    source .venv/bin/activate  # On Windows, use `.venv\Scripts\activate`
+    ```
+
+3.  **Install the dependencies:**
+    ```bash
     pip install -r requirements.txt
     ```
 
-3.  **Create a `.env` file** in the root directory and add your OpenAI API key:
+4. **Set up your environment variables:**
+    Create a `.env` file in the root of the project and add your API keys:
     ```
-    OPENAI_API_KEY=your_api_key_here
+    OPENAI_API_KEY="your-openai-api-key"
+    GOOGLE_API_KEY="your-google-api-key"
     ```
 
-## Usage
+## Running the Application
 
-Run the Flask application:
+1. **Initialize the Reflex application:**
+    ```bash
+    reflex init
+    ```
 
-```bash
-python app.py
-```
+2. **Run the application:**
+    ```bash
+    reflex run
+    ```
+    The application will be available at `http://localhost:3000`.
 
-Open your web browser and go to `http://127.0.0.1:5000`. 
+*Note: If the `reflex` command is not found, you can use `python -m reflex ...` instead.*
