@@ -3,6 +3,7 @@ from google import genai
 import re
 import os
 from dotenv import load_dotenv
+import concurrent.futures
 
 load_dotenv()
 
@@ -37,31 +38,39 @@ def prompt_google_llm(prompt: str):
 
 def generate_test_questions(topic: str, num_questions: int = 5):
     """
-    Generates a list of test questions on a given topic.
+    Generates a list of test questions on a given topic in parallel.
     """
-    prompt = f"Generate {num_questions} test questions about {topic}. Please provide them as a numbered list."
-    raw_text = prompt_openai_llm(prompt)
-    questions = re.findall(r"\d+\.\s*(.*)", raw_text)
+    def generate_single_question(topic_str: str):
+        prompt = f"Generate one test question about {topic_str}."
+        raw_text = prompt_openai_llm(prompt)
+        match = re.search(r"^\s*\d+\.\s*(.*)", raw_text)
+        if match:
+            return match.group(1).strip()
+        return raw_text.strip()
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        questions = list(executor.map(generate_single_question, [topic] * num_questions))
     return questions
 
 def generate_answers(questions: list[str]):
     """
-    Generates answers for a list of questions and returns a list of answers.
+    Generates answers for a list of questions in parallel and returns a list of answers.
     """
-    answers = []
-    for question in questions:
+    def get_answer(question):
         prompt = f"What is the answer to the following question: {question}"
-        answer = prompt_openai_llm(prompt)
-        answers.append(answer)
+        return prompt_openai_llm(prompt)
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        answers = list(executor.map(get_answer, questions))
     return answers
 
 def evaluate_answers(qa_pairs: list[tuple[str, str]], eval_prompt_template: str, prompter_func):
     """
-    Evaluates the correctness of answers in a list of question-answer pairs using a given prompter function.
+    Evaluates the correctness of answers in a list of question-answer pairs using a given prompter function in parallel.
     Returns a list of (score, notes) tuples.
     """
-    evaluations = []
-    for question, answer in qa_pairs:
+    def evaluate_single(qa_pair):
+        question, answer = qa_pair
         prompt = eval_prompt_template.format(question=question, answer=answer)
         response_text = prompter_func(prompt)
         
@@ -69,7 +78,6 @@ def evaluate_answers(qa_pairs: list[tuple[str, str]], eval_prompt_template: str,
         score = int(score_match.group(1)) if score_match else None
         
         if score is None:
-            # Fallback to a less specific regex if the "Score: X" format is not found
             score_match = re.search(r'\b[1-5]\b', response_text)
             score = int(score_match.group(0)) if score_match else None
         
@@ -77,10 +85,13 @@ def evaluate_answers(qa_pairs: list[tuple[str, str]], eval_prompt_template: str,
         notes = notes_match.group(1).strip() if notes_match else response_text.strip()
 
         if score is not None:
-            evaluations.append((score, notes))
+            return (score, notes)
         else:
             print(f"Warning: Could not extract a score for question: '{question}'")
-            evaluations.append((None, notes))
+            return (None, notes)
+
+    with concurrent.futures.ThreadPoolExecutor() as executor:
+        evaluations = list(executor.map(evaluate_single, qa_pairs))
     return evaluations
 
 def main():
