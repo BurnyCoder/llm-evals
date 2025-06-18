@@ -65,10 +65,16 @@ def evaluate_answers(qa_pairs: list[tuple[str, str]], eval_prompt_template: str,
         prompt = eval_prompt_template.format(question=question, answer=answer)
         response_text = prompter_func(prompt)
         
-        score_match = re.search(r'\b[1-5]\b', response_text)
-        score = int(score_match.group(0)) if score_match else None
+        score_match = re.search(r"score:\s*([1-5])", response_text, re.IGNORECASE)
+        score = int(score_match.group(1)) if score_match else None
         
-        notes = response_text.strip()
+        if score is None:
+            # Fallback to a less specific regex if the "Score: X" format is not found
+            score_match = re.search(r'\b[1-5]\b', response_text)
+            score = int(score_match.group(0)) if score_match else None
+        
+        notes_match = re.search(r"notes:(.*)", response_text, re.IGNORECASE | re.DOTALL)
+        notes = notes_match.group(1).strip() if notes_match else response_text.strip()
 
         if score is not None:
             evaluations.append((score, notes))

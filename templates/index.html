@@ -79,11 +79,15 @@
                 <label for="eval_prompt">Evaluation Prompt</label>
                 <textarea id="eval_prompt" name="eval_prompt" rows="8">Please evaluate the correctness of the following answer for the given question. Provide a score from 1 to 5, where 1 is completely incorrect and 5 is completely correct and well-explained.
 
+Format response in this style:
+                    
+Score: {{score}}
+                    
 Question: {question}
-
+                    
 Answer: {answer}
-
-Evaluation (1-5):</textarea>
+                    
+Notes: {{notes}}</textarea>
             </div>
 
             <input type="hidden" name="eval_data" id="eval_data">
