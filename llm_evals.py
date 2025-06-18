@@ -33,6 +33,7 @@ def prompt_google_llm(prompt: str):
         contents=prompt
     )
     print(response.text)
+    return response.text
 
 def generate_test_questions(topic: str, num_questions: int = 5):
     """
@@ -54,15 +55,15 @@ def generate_answers(questions: list[str]):
         answers.append(answer)
     return answers
 
-def evaluate_answers(qa_pairs: list[tuple[str, str]], eval_prompt_template: str):
+def evaluate_answers(qa_pairs: list[tuple[str, str]], eval_prompt_template: str, prompter_func):
     """
-    Evaluates the correctness of answers in a list of question-answer pairs.
+    Evaluates the correctness of answers in a list of question-answer pairs using a given prompter function.
     Returns a list of (score, notes) tuples.
     """
     evaluations = []
     for question, answer in qa_pairs:
         prompt = eval_prompt_template.format(question=question, answer=answer)
-        response_text = prompt_openai_llm(prompt)
+        response_text = prompter_func(prompt)
         
         score_match = re.search(r'\b[1-5]\b', response_text)
         score = int(score_match.group(0)) if score_match else None
@@ -98,29 +99,49 @@ def main():
         for q, a in qa_pairs:
             print(f"Q: {q}\nA: {a}\n")
 
-        print("\nEvaluating answers...")
         eval_prompt_template = (
             f"Please evaluate the correctness of the following answer for the given question. "
             f"Provide a score from 1 to 5, where 1 is completely incorrect and 5 is completely correct and well-explained."
             f"\n\nQuestion: {{question}}\n\nAnswer: {{answer}}\n\nScore (1-5):"
         )
-        evals = evaluate_answers(qa_pairs, eval_prompt_template)
+        
+        print("\n--- OpenAI Evaluation ---")
+        evals_openai = evaluate_answers(qa_pairs, eval_prompt_template, prompt_openai_llm)
 
-        print("\n--- Evaluation Scores ---")
-        total_score = 0
-        valid_scores = 0
+        print("\n--- Evaluation Scores (OpenAI) ---")
+        total_score_openai = 0
+        valid_scores_openai = 0
         for i, (q, a) in enumerate(qa_pairs):
-            score, notes = evals[i]
+            score, notes = evals_openai[i]
             print(f"Q: {q}\nScore: {score}/5\nNotes: {notes}\n" if score is not None else f"Q: {q}\nScore: Not available\nNotes: {notes}\n")
             if score is not None:
-                total_score += score
-                valid_scores += 1
+                total_score_openai += score
+                valid_scores_openai += 1
 
-        if valid_scores > 0:
-            average_score = total_score / valid_scores
-            print(f"\nAverage score: {average_score:.2f}/5")
+        if valid_scores_openai > 0:
+            average_score_openai = total_score_openai / valid_scores_openai
+            print(f"\nAverage score (OpenAI): {average_score_openai:.2f}/5")
         else:
-            print("\nCould not calculate an average score.")
+            print("\nCould not calculate an average score for OpenAI.")
+
+        print("\n--- Google Evaluation ---")
+        evals_google = evaluate_answers(qa_pairs, eval_prompt_template, prompt_google_llm)
+
+        print("\n--- Evaluation Scores (Google) ---")
+        total_score_google = 0
+        valid_scores_google = 0
+        for i, (q, a) in enumerate(qa_pairs):
+            score, notes = evals_google[i]
+            print(f"Q: {q}\nScore: {score}/5\nNotes: {notes}\n" if score is not None else f"Q: {q}\nScore: Not available\nNotes: {notes}\n")
+            if score is not None:
+                total_score_google += score
+                valid_scores_google += 1
+        
+        if valid_scores_google > 0:
+            average_score_google = total_score_google / valid_scores_google
+            print(f"\nAverage score (Google): {average_score_google:.2f}/5")
+        else:
+            print("\nCould not calculate an average score for Google.")
 
 if __name__ == '__main__':
     main()

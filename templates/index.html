@@ -10,8 +10,11 @@
     <div class="container">
         <h1>LLM Evaluation Sheet</h1>
 
-        {% if average_score is defined %}
-        <h2>Average Score: {{ "%.2f"|format(average_score) }}/5</h2>
+        {% if average_score_openai is defined %}
+        <h2>Average Score (OpenAI): {{ "%.2f"|format(average_score_openai) }}/5</h2>
+        {% endif %}
+        {% if average_score_google is defined %}
+        <h2>Average Score (Google): {{ "%.2f"|format(average_score_google) }}/5</h2>
         {% endif %}
 
         <div class="generation-controls">
@@ -33,8 +36,10 @@
                         <tr>
                             <th>Question</th>
                             <th>Answer</th>
-                            <th>Evaluation</th>
-                            <th>Notes</th>
+                            <th>OpenAI Score</th>
+                            <th>OpenAI Notes</th>
+                            <th>Google Score</th>
+                            <th>Google Notes</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -43,13 +48,17 @@
                             <tr>
                                 <td contenteditable="true">{{ result.question }}</td>
                                 <td contenteditable="true">{{ result.answer }}</td>
-                                <td contenteditable="true" class="score">{{ result.score if result.score is not none else 'N/A' }}</td>
-                                <td contenteditable="true">{{ result.notes }}</td>
+                                <td contenteditable="true" class="score">{{ result.openai_score if result.openai_score is not none else 'N/A' }}</td>
+                                <td contenteditable="true">{{ result.openai_notes }}</td>
+                                <td contenteditable="true" class="score">{{ result.google_score if result.google_score is not none else 'N/A' }}</td>
+                                <td contenteditable="true">{{ result.google_notes }}</td>
                             </tr>
                             {% endfor %}
                         {% else %}
                             {% for i in range(10) %}
                             <tr>
+                                <td contenteditable="true"></td>
+                                <td contenteditable="true"></td>
                                 <td contenteditable="true"></td>
                                 <td contenteditable="true"></td>
                                 <td contenteditable="true"></td>
@@ -91,6 +100,8 @@ Evaluation (1-5):</textarea>
                 <td contenteditable="true"></td>
                 <td contenteditable="true"></td>
                 <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
+                <td contenteditable="true"></td>
             `;
             tableBody.appendChild(newRow);
         });
@@ -112,6 +123,8 @@ Evaluation (1-5):</textarea>
                     const newRow = document.createElement('tr');
                     newRow.innerHTML = `
                         <td contenteditable="true">${question}</td>
+                        <td contenteditable="true"></td>
+                        <td contenteditable="true"></td>
                         <td contenteditable="true"></td>
                         <td contenteditable="true"></td>
                         <td contenteditable="true"></td>

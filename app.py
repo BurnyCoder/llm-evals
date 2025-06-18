@@ -45,23 +45,39 @@ def evaluate():
     qa_pairs = [(item['question'], item['answer']) for item in eval_data if item.get('question') and item.get('answer')]
 
     if not qa_pairs:
-        return render_template('index.html', results=[], average_score=0)
+        return render_template('index.html', results=[], average_score_openai=0, average_score_google=0)
 
-    evaluations = llm_evals.evaluate_answers(qa_pairs, eval_prompt)
+    evaluations_openai = llm_evals.evaluate_answers(qa_pairs, eval_prompt, llm_evals.prompt_openai_llm)
+    evaluations_google = llm_evals.evaluate_answers(qa_pairs, eval_prompt, llm_evals.prompt_google_llm)
 
     results = []
-    total_score = 0
-    valid_scores = 0
-    for i, (q, a) in enumerate(qa_pairs):
-        score, notes = evaluations[i]
-        results.append({'question': q, 'answer': a, 'score': score, 'notes': notes})
-        if score is not None:
-            total_score += score
-            valid_scores += 1
-    
-    average_score = total_score / valid_scores if valid_scores > 0 else 0
+    total_score_openai = 0
+    valid_scores_openai = 0
+    total_score_google = 0
+    valid_scores_google = 0
 
-    return render_template('index.html', results=results, average_score=average_score)
+    for i, (q, a) in enumerate(qa_pairs):
+        score_openai, notes_openai = evaluations_openai[i]
+        score_google, notes_google = evaluations_google[i]
+        results.append({
+            'question': q, 
+            'answer': a, 
+            'openai_score': score_openai, 
+            'openai_notes': notes_openai,
+            'google_score': score_google,
+            'google_notes': notes_google
+        })
+        if score_openai is not None:
+            total_score_openai += score_openai
+            valid_scores_openai += 1
+        if score_google is not None:
+            total_score_google += score_google
+            valid_scores_google += 1
+    
+    average_score_openai = total_score_openai / valid_scores_openai if valid_scores_openai > 0 else 0
+    average_score_google = total_score_google / valid_scores_google if valid_scores_google > 0 else 0
+
+    return render_template('index.html', results=results, average_score_openai=average_score_openai, average_score_google=average_score_google)
 
 if __name__ == '__main__':
     app.run(debug=True) 
