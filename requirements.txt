@@ -1,3 +1,6 @@
 openai
 python-dotenv
-Flask 
+google-generativeai
+reflex
+pandas 
+reflex==0.7.14
