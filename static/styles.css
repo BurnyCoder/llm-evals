@@ -72,14 +72,22 @@ table {
     border-collapse: collapse;
     margin-top: 1em;
     border: 2px solid #ccc;
+    table-layout: fixed;
 }
 
 th, td {
     border: 1px solid #ccc;
     padding: 0.8em;
     text-align: left;
-    min-width: 150px;
+    word-wrap: break-word;
 }
+
+th:nth-child(1), td:nth-child(1) { width: 20%; } /* Question */
+th:nth-child(2), td:nth-child(2) { width: 20%; } /* Answer */
+th:nth-child(3), td:nth-child(3) { width: 10%; } /* OpenAI Score */
+th:nth-child(4), td:nth-child(4) { width: 25%; } /* OpenAI Notes */
+th:nth-child(5), td:nth-child(5) { width: 10%; } /* Google Score */
+th:nth-child(6), td:nth-child(6) { width: 25%; } /* Google Notes */
 
 th {
     background-color: #f2f2f2;
