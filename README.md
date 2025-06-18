@@ -2,6 +2,8 @@
 
 This is a web application built with [Reflex](https://reflex.dev/) that allows you to evaluate and compare the performance of different Large Language Models (LLMs), specifically OpenAI and Google models.
 
+![image](https://github.com/user-attachments/assets/f0e4ac17-c476-4172-93d7-b67566b43b00)
+
 ## Features
 
 - **Generate Questions:** Automatically generate a set of questions on a given topic.
