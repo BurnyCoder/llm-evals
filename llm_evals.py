@@ -123,5 +123,4 @@ def main():
             print("\nCould not calculate an average score.")
 
 if __name__ == '__main__':
-    prompt_google_llm("Hi")
-    # main()
+    main()
