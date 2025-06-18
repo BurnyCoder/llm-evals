@@ -14,7 +14,7 @@ This is a web application built with [Reflex](https://reflex.dev/) that allows y
 
 1.  **Clone the repository:**
     ```bash
-    git clone <your-repo-url>
+    git clone https://github.com/BurnyCoder/llm-evals/
     cd llm-evals
     ```
 
